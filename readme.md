@@ -28,7 +28,8 @@ If I was going to use this personally, I would go through the effort of the "ful
 </details>
 
 ## Demo GIF
-![](./Demo.mp4)
+![](./Demo.gif)
+Note: There is currently a bug with this presentation that the HUD for the mode on the first slide does not work. Pay attention to the mode indication below the static one.
 
 ## FAQs (Click to expand)
 <details>
