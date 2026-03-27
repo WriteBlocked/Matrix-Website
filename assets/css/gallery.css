@@ -1,0 +1,34 @@
+/* Works for both <gallery> and <div class="gallery"> */
+gallery, .gallery {
+  position: relative;
+  --gutter: 8px; /* default, can be overridden with attribute */
+  display: block;
+}
+
+.gallery-item {
+  width: calc(50% - var(--gutter));
+  margin-bottom: var(--gutter);
+}
+
+.gallery-item img {
+  display: block;
+  width: 100%;
+  height: auto;      /* intrinsic height → collage look */
+  border-radius: 8px;
+}
+
+/* Tablet: 3 cols */
+@media (min-width: 640px) {
+  .gallery-item { width: calc(33.333% - var(--gutter)); }
+}
+
+/* Desktop: 4 cols */
+@media (min-width: 1024px) {
+  .gallery-item { width: calc(25% - var(--gutter)); }
+}
+
+/* Optional: slight variation so it feels curated */
+@media (min-width: 1024px) {
+  .gallery-item:nth-child(7n)  { width: calc(50% - var(--gutter)); }
+  .gallery-item:nth-child(11n) { width: calc(33.333% - var(--gutter)); }
+}
