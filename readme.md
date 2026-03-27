@@ -40,7 +40,6 @@ Note: There is currently a bug with this presentation that the HUD for the mode 
 </summary>
 Simply open the presentation.html file and start presenting!
 </details>
-
 <details>
 <summary>
 
@@ -51,7 +50,6 @@ Simply open the presentation.html file and start presenting!
 You will have to modify the contents of the presentation.html file. Scroll to the section that says "EDIT HERE" and you can edit up to where it says "END EDIT HERE". Note the format for the slides. Every slide needs to begin with {matrix} and in between the content of each slide, there is a divider, ---
 
 </details>
-
 <details>
 <summary>
 
@@ -62,7 +60,6 @@ You will have to modify the contents of the presentation.html file. Scroll to th
 There is a section of the presentation.html file that begins with "CONFIG" that allows you to customize options for the slides. It currently is focused primarily on the timings of the rain, which should allow you to slightly tweak it. If I get interest, I might add different color presets.
 
 </details>
-
 <details>
 <summary>
 
@@ -73,18 +70,16 @@ There is a section of the presentation.html file that begins with "CONFIG" that 
 Good question. It accepts Markdown [here](https://www.markdownguide.org/cheat-sheet/) is a handy guide, HTML, and several embedded media types (eg. images, videos, links, etc.). The [reveal.js site](https://revealjs.com) has documention on other functionality, such as vertical slides, transitions, notes, and more. 
 
 </details>
-
 <details>
 <summary>
 
-Do you have a demo site?
+### Do you have a demo site?
 
 </summary>
 
 I do not. Luckily, this repository is small and should be quick to download. If you have any issues, please feel free to contact me via [my website](https://hhoover.net)
 
 </details>
-
 <details>
 <summary>
 
