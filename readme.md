@@ -28,6 +28,7 @@ If I was going to use this personally, I would go through the effort of the "ful
 </details>
 
 ## Demo GIF
+![](./Demo.mp4)
 
 ## FAQs (Click to expand)
 <details>
