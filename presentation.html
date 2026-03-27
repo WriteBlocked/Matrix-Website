@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Final Presentation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Local Reveal assets -->
+  <link rel="stylesheet" href="vendor/reveal.min.css">
+  <link rel="stylesheet" href="vendor/black.min.css" id="theme">
+  <link rel="stylesheet" href="assets/css/gallery.css" />
+
+  <style>
+    :root {
+      --matrix-green:#00ff95;
+
+      /* Readability (JS sets from CONFIG.READABILITY) */
+      --plate-opacity: .35;
+      --plate-pad-em: .2;
+      --plate-radius-em: .35;
+      --dim-opacity: 0;
+    }
+
+    html, body { height:100%; background:#000; margin:0; overflow:hidden; }
+
+    /* Dim layer behind slides, above rain */
+    #dim { position:fixed; inset:0; z-index:0; pointer-events:none; background: rgba(0,0,0,var(--dim-opacity)); }
+
+    /* Rain canvas (under dim) */
+    #rain { position:fixed; inset:0; z-index:0; background:#000; display:block; }
+
+    /* Slides overlay */
+    .reveal, .slides { background:transparent; position:relative; z-index:1; }
+
+    /* Readability & hero styling */
+    .content-box { background:rgba(0,0,0,.55); padding:1rem; border-radius:8px; display:inline-block; }
+    .reveal h1, .reveal h2, .reveal p, .reveal li { color:#fff; text-shadow:0 0 8px rgba(0,0,0,.9); }
+    .matrix-text { color:var(--matrix-green) !important; text-shadow:0 0 10px rgba(0,255,149,0.8) !important; }
+
+    /* Markdown readability backplates (only inside md-embed) */
+    #md-embed :where(h1,h2,h3,h4,p,li,blockquote,pre,code) {
+      background: rgba(0,0,0,var(--plate-opacity));
+      padding: calc(var(--plate-pad-em) * 1em) calc(var(--plate-pad-em) * 1.8em);
+      border-radius: calc(var(--plate-radius-em) * 1em);
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
+      line-height: 1.3;
+      backdrop-filter: blur(var(--plate-blur, 0px));
+      -webkit-backdrop-filter: blur(var(--plate-blur, 0px));
+    }
+
+    /* Tight plate for any {matrix} line (heading or paragraph/list) */
+    #md-embed :where(h1.matrix-text, h2.matrix-text, h3.matrix-text, h4.matrix-text,
+                    p.matrix-text,  li.matrix-text){
+      display: inline-block;
+      max-width: 100%;
+    }
+
+    /* Images: fit, no crop by default */
+    .reveal section img {
+      display:block; max-width:100%; height:auto; max-height:85vh; object-fit:contain; margin:0 auto;
+    }
+    .img-fit   { max-height:85vh; object-fit:contain; }
+    .img-75vh  { max-height:75vh; object-fit:contain; }
+    .img-50vh  { max-height:50vh; object-fit:contain; }
+    .img-cover { width:100%; height:85vh; object-fit:cover; } /* may crop */
+
+    /* Gallery (up to 6) */
+    .gallery { --cols:3; --gap:12px; display:grid; grid-template-columns:repeat(var(--cols),minmax(0,1fr)); gap:var(--gap); margin:0 auto; max-width:95vw; }
+    .gallery-2{ --cols:2; } .gallery-3{ --cols:3; } .gallery-4{ --cols:4; }
+    .gallery img, .gallery a img { width:100%; height:100%; object-fit:cover; border-radius:10px; box-shadow:0 8px 30px rgba(0,0,0,.35); cursor:zoom-in; background:#0a0a0a; }
+    .gallery img.contain { object-fit:contain; }
+
+    /* Lightbox */
+    #lb { position:fixed; inset:0; z-index:5; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.92); }
+    #lb.show{ display:flex; }
+    #lb img{ max-width:92vw; max-height:92vh; object-fit:contain; display:block; box-shadow:0 16px 60px rgba(0,0,0,.6); border-radius:10px; background:#000; }
+    #lb .caption{ margin-top:.6rem; color:#eaeaea; text-align:center; font:500 14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Arial; max-width:92vw; }
+    #lb .nav{ position:absolute; top:50%; transform:translateY(-50%); color:#eaeaea; font:700 22px/1 system-ui; background:rgba(0,0,0,.3); border:1px solid rgba(255,255,255,.12); padding:.5rem .7rem; border-radius:.7rem; cursor:pointer; user-select:none; }
+    #lb .prev{ left:18px; }  #lb .next{ right:18px; }
+    #lb .close{ position:absolute; top:14px; right:16px; font:700 18px/1 system-ui; background:rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.12); padding:.35rem .55rem; border-radius:.6rem; cursor:pointer; }
+
+    /* HUD/Toast */
+    #mode-hud, #mode-toast{
+      position:fixed; right:12px; z-index:3; background:rgba(0,0,0,.6); color:#cfcfcf; padding:.45rem .65rem;
+      border-radius:.5rem; font:500 13px/1.2 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial; border:1px solid rgba(255,255,255,.08);
+    }
+    #mode-hud { top:12px; display:none; }  #mode-hud.show{ display:block; }
+    #mode-toast{ top:52px; opacity:0; transition:opacity .25s ease; pointer-events:none; }  #mode-toast.show{ opacity:1; }
+  </style>
+</head>
+<body>
+  <div id="mode-hud"></div>
+  <div id="mode-toast"></div>
+  <div id="lb" aria-hidden="true">
+    <button class="close" aria-label="Close">✕</button>
+    <button class="nav prev" aria-label="Previous">‹</button>
+    <img alt="">
+    <button class="nav next" aria-label="Next">›</button>
+    <div class="caption"></div>
+  </div>
+
+  <div id="dim"></div>
+  <canvas id="rain"></canvas>
+
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- ===== EDIT HERE: CONFIG + CONTENT are kept together, high up ===== -->
+      <script>
+        // ========================= CONFIG (read me) =========================
+        const CONFIG = {
+          // --- Matrix rain layout ---
+          FONT_SIZE: 20,        // px per character cell; increase for larger, crisper digits
+          TRAIL_LEN: 16,        // how many digits trail each head (longer = more persistence)
+
+          // --- Matrix rain digit behavior ---
+          // While raining (not paused), digits flicker randomly; when paused they freeze.
+          DIGIT_CHANGE_PROB: 0.06,   // base chance per visible TRAIL digit per frame to flip 0/1 (scaled by speed) in non-slow-continue modes
+          HEAD_CHANGE_PROB: 0.25,    // chance per frame the HEAD digit flips (all modes)
+
+          // Slow-continue ONLY: trail digits flip on independent timers per cell
+          // Choose a random interval in [min,max] seconds for each trail cell, then flip when the timer elapses.
+          SLOW_TWINKLE_RANGE_S: [5, 12],
+
+          // --- Matrix rain motion (global) ---
+          SPEED_BASE: 0.28,     // rows per animation frame; lower = slower rain everywhere
+          FREEZE_TIME: 1000,    // ms: Spacebar pause ramps per-column speed -> 0
+          RESUME_TIME: 600,     // ms: Spacebar resume ramps per-column speed -> 1
+
+          // --- Per-slide behavior (slides AFTER the first) ---
+          // Modes: 'decelerate' (stop), 'brief-freeze' (short move → stop), 'slow-continue' (keep very slow, per-column)
+          SLIDE_RAIN_MODE: 'slow-continue',
+          SLIDE_RAIN_DECEL_MS: 5000,  // ms to ramp down in 'decelerate' / 'slow-continue'
+          MOVE_BEFORE_FREEZE: 1000,   // ms of motion before fast stop (only 'brief-freeze')
+
+          // Slow-continue tuning:
+          SLOW_FACTOR: 0.04,          // target slow speed (0..1) once settled
+          SLOW_JITTER: 0.01,          // +/- random variation per column
+          SLOW_STAGGER_MS: 2000,      // random delay per column before its slow ramp begins
+
+          // --- Readability controls (slide content over background) ---
+          READABILITY: {
+            PLATE_OPACITY: 0.8,       // 0..0.8 — strength of per-line backplates in Markdown slides
+            PLATE_PADDING_EM: 0.20,   // backplate padding (em)
+            PLATE_RADIUS_EM: 0.35,    // backplate corner radius (em)
+            DIM_OPACITY: 0.7,         // 0..0.7 — global dim layer behind slides (0 = off)
+            PLATE_BLUR_PX: 6          // blur strength for text backplates (0–10 is typical)
+          },
+
+          // --- UI toggles ---
+          MODE_HUD_ENABLED: true      // show a small persistent HUD with the current rain mode
+        };
+        // ====================================================================
+      </script>
+
+      <!-- Slide 1 (hero) — always continuous unless you pause with space -->
+      <section>
+        <div class="content-box">
+          <h1 class="matrix-text">Matrix-Style Presentation</h1>
+          <p class="matrix-text">Subtitle Text</p>
+        </div>
+      </section>
+
+      <!-- Embedded Markdown (works offline under file://) -->
+      <section id="md-embed" data-markdown>
+        <textarea data-template>
+{matrix} Agenda
+
+- Threat Landscape
+- Controls and Monitoring
+- Roadmap
+
+---
+{matrix} Background
+- GMU Cybersecurity BSc
+- GMU Digital Forensics MSc
+- Lifelong nerd
+
+---
+{matrix} Example image
+
+<img src="assets/images/g2.webp" alt="example" class="img-fit">
+
+---
+{matrix} 4-up Gallery (click to enlarge)
+
+<div class="gallery gallery-4">
+  <img src="assets/images/g2.webp" alt="One">
+  <img src="assets/images/g3.webp" alt="Two">
+  <img src="assets/images/g4.webp" alt="Three">
+  <img src="assets/images/g2.webp">
+</div>
+
+---
+{matrix} Tabling
+
+<gallery>
+  <img src="assets/images/g2.webp">
+  <img src="assets/images/g3.webp">
+  <img src="assets/images/g4.webp">
+  <img src="assets/images/g2.webp">
+  <img src="assets/images/g3.webp">
+  <img src="assets/images/g4.webp">
+</gallery>
+
+
+        </textarea>
+      </section>
+      <!-- ===== END EDIT HERE ===== -->
+
+    </div>
+  </div>
+
+  <!-- Local JS -->
+  <script src="vendor/reveal.min.js"></script>
+  <script src="vendor/marked.min.js"></script>
+  <script src="vendor/markdown.min.js"></script>
+  <script src="assets/js/imagesloaded.pkgd.min.js"></script>
+  <script src="assets/js/packery.pkgd.min.js"></script>
+  <script defer src="assets/js/gallery.js"></script>
+
+  <script>
+    // Apply readability variables from CONFIG early
+    (function(){
+      const r = CONFIG.READABILITY || {};
+      document.documentElement.style.setProperty('--plate-opacity', String(r.PLATE_OPACITY ?? .35));
+      document.documentElement.style.setProperty('--plate-pad-em', String(r.PLATE_PADDING_EM ?? .2));
+      document.documentElement.style.setProperty('--plate-radius-em', String(r.PLATE_RADIUS_EM ?? .35));
+      document.documentElement.style.setProperty('--dim-opacity', String(r.DIM_OPACITY ?? 0));
+      document.documentElement.style.setProperty('--plate-blur', String((CONFIG.READABILITY.PLATE_BLUR_PX ?? 0)) + 'px');
+
+    })();
+
+    // -------- Matrix Rain (per-column speeds, twinkling digits) --------
+    (function(){
+      const canvas = document.getElementById('rain');
+      const ctx = canvas.getContext('2d', {alpha:false});
+
+      let w,h,cols,rows;
+      let heads = [];
+      let colSpeed = [];       // per-column speed factor 0..1
+      let ramps = [];          // per-column ramp controllers
+      let running = true;      // global pause flag (stops movement & digit flicker)
+      let pausedByUser = false;
+
+      // Digit grid persists (so digits freeze cleanly)
+      let digitGrid = [];
+      // Slow-continue: independent timers for TRAIL digits
+      let trailFlipAt = []; // [rows][cols] timestamps (ms)
+
+      function randIn(min,max){ return min + Math.random()*(max-min); }
+
+      function initDigitGrid(){
+        digitGrid = Array.from({length:rows}, () =>
+          Array.from({length:cols}, () => (Math.random() < 0.5 ? '0' : '1'))
+        );
+        const range = CONFIG.SLOW_TWINKLE_RANGE_S || [1.5,4.0];
+        const now = performance.now();
+        trailFlipAt = Array.from({length:rows}, () =>
+          Array.from({length:cols}, () => now + randIn(range[0], range[1]) * 1000)
+        );
+      }
+
+      function setFont(){
+        ctx.textBaseline='top';
+        ctx.textAlign='left';
+        ctx.font = `700 ${CONFIG.FONT_SIZE}px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`;
+      }
+
+      function resize(){
+        w = canvas.width = innerWidth;
+        h = canvas.height = innerHeight;
+        cols = Math.floor(w/CONFIG.FONT_SIZE);
+        rows = Math.floor(h/CONFIG.FONT_SIZE);
+        heads = Array.from({length:cols}, () => -Math.floor(Math.random()*rows));
+        colSpeed = Array.from({length:cols}, () => 1);
+        ramps = Array.from({length:cols}, () => null);
+        setFont();
+        initDigitGrid();
+      }
+      addEventListener('resize', resize);
+      resize();
+
+      function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
+
+      // Start a per-column ramp (delay optional)
+      function startRamp(x, to, ms, delay=0){
+        const from = colSpeed[x];
+        const start = performance.now() + Math.max(0, delay);
+        const dur = Math.max(1, ms);
+        ramps[x] = { from, to: Math.max(0, Math.min(1, to)), start, dur, done:false };
+      }
+
+      function updateRamps(now){
+        for (let x=0; x<cols; x++){
+          const r = ramps[x];
+          if (!r || r.done) continue;
+          if (now < r.start) continue;
+          const t = Math.min(1, (now - r.start) / r.dur);
+          colSpeed[x] = r.from + (r.to - r.from) * easeOutCubic(t);
+          if (t >= 1) r.done = true;
+        }
+      }
+
+      function setAllSpeeds(to){ for (let x=0; x<cols; x++) colSpeed[x] = to; }
+      function rampAll(to, ms){ for (let x=0; x<cols; x++) startRamp(x, to, ms, 0); }
+
+      function maybeFlipTrailSlow(x,y,now){
+        // Flip when timer elapses, then schedule the next one within range
+        const range = CONFIG.SLOW_TWINKLE_RANGE_S || [1.5,4.0];
+        if (now >= trailFlipAt[y][x]){
+          digitGrid[y][x] = (digitGrid[y][x] === '0') ? '1' : '0';
+          trailFlipAt[y][x] = now + randIn(range[0], range[1]) * 1000;
+        }
+        return digitGrid[y][x];
+      }
+
+      function maybeFlipDigit(x,y,isHead,spd,now){
+        if (isHead){
+          // head: lively in all modes, prob scaled by speed
+          const p = CONFIG.HEAD_CHANGE_PROB * Math.max(0.25, spd);
+          if (Math.random() < p) digitGrid[y][x] = (digitGrid[y][x] === '0') ? '1' : '0';
+          return digitGrid[y][x];
+        }
+        // trail: special scheduling in slow-continue, otherwise probabilistic
+        if (CONFIG.SLIDE_RAIN_MODE === 'slow-continue'){
+          return maybeFlipTrailSlow(x,y,now);
+        } else {
+          const p = CONFIG.DIGIT_CHANGE_PROB * Math.max(0.25, spd);
+          if (Math.random() < p) digitGrid[y][x] = (digitGrid[y][x] === '0') ? '1' : '0';
+          return digitGrid[y][x];
+        }
+      }
+
+      function renderFrame(now){
+        updateRamps(now);
+
+        ctx.fillStyle = '#000'; ctx.fillRect(0,0,w,h);
+
+        for (let x=0; x<cols; x++){
+          const head = heads[x];
+          const spd = colSpeed[x];
+
+          for (let t=0; t<CONFIG.TRAIL_LEN; t++){
+            const y = Math.floor(head - t);
+            if (y < 0 || y >= rows) continue;
+
+            const ch = running ? maybeFlipDigit(x,y, t===0, spd, now) : digitGrid[y][x];
+
+            const px = x*CONFIG.FONT_SIZE;
+            const py = y*CONFIG.FONT_SIZE;
+            const a  = t===0 ? 1.0 : t===1 ? 0.88 : Math.max(0.14, 1 - (t/CONFIG.TRAIL_LEN)*0.9);
+
+            ctx.fillStyle = `rgba(0,255,149,${a})`;
+            ctx.fillText(ch, px, py);
+          }
+
+          if (running){
+            heads[x] += CONFIG.SPEED_BASE * spd;
+            if (heads[x] - CONFIG.TRAIL_LEN > rows && Math.random() > 0.985){
+              heads[x] = -Math.floor(Math.random()*rows*0.5);
+            }
+          }
+        }
+      }
+
+      (function loop(now){ renderFrame(now||performance.now()); requestAnimationFrame(loop); })();
+
+      function averageSpeed(){
+        let s=0; for (let i=0;i<colSpeed.length;i++) s+=colSpeed[i]; return (colSpeed.length? s/colSpeed.length : 1);
+      }
+
+      // Public API
+      window.MatrixRain = {
+        playContinuous(){ running = true; pausedByUser=false; rampAll(1, 250); },
+        decelerateToStop(ms){
+          running = true; pausedByUser=false;
+          rampAll(0, ms);
+          setTimeout(()=>{ running=false; }, ms+30);
+        },
+        briefThenFreeze(moveMs){
+          running = true; pausedByUser=false;
+          rampAll(1, 200);
+          setTimeout(()=>{ rampAll(0, 800); setTimeout(()=>{ running=false; }, 820); }, moveMs);
+        },
+        decelerateToSlow(ms, slow, jitter, stagger){
+          running = true; pausedByUser=false;
+          for (let x=0; x<cols; x++){
+            const j = (Math.random()*2 - 1) * (jitter||0);
+            const target = Math.max(0, Math.min(1, (slow||0.08) + j));
+            const delay  = Math.random() * (stagger||0);
+            startRamp(x, target, ms, delay);
+          }
+        },
+        togglePause(){
+          if (running && !pausedByUser){
+            pausedByUser = true;
+            rampAll(0, CONFIG.FREEZE_TIME);
+            setTimeout(()=>{ running=false; }, CONFIG.FREEZE_TIME+30);
+          } else {
+            pausedByUser = false;
+            running = true;
+            rampAll(1, CONFIG.RESUME_TIME);
+          }
+        },
+        resumeIfUserPaused(){
+          if (pausedByUser){
+            pausedByUser = false;
+            running = true;
+            rampAll(1, CONFIG.RESUME_TIME);
+            return true;
+          }
+          return false;
+        },
+        decelerateBurstThenStop(burstMs, decelMs){
+          // 1) Quick bump to full speed so you SEE motion
+          running = true; pausedByUser = false;
+          rampAll(1, 200);
+
+          // 2) After the burst, ramp smoothly to stop
+          setTimeout(()=>{
+            rampAll(0, decelMs);
+            // 3) Freeze (stop flicker & motion) after the ramp completes
+            setTimeout(()=>{ running = false; }, decelMs + 40);
+          }, Math.max(0, burstMs));
+        },
+        isUserPaused(){ return pausedByUser; },
+        applyMode(mode){
+          CONFIG.SLIDE_RAIN_MODE = mode; // keep in sync for twinkle logic & HUD
+          switch (mode) {
+            case 'decelerate':     MatrixRain.decelerateBurstThenStop(CONFIG.MOVE_BEFORE_FREEZE,CONFIG.SLIDE_RAIN_DECEL_MS); break;
+            case 'brief-freeze':   MatrixRain.briefThenFreeze(CONFIG.MOVE_BEFORE_FREEZE);    break;
+            case 'continuous':     MatrixRain.playContinuous(); break;
+            case 'slow-continue':
+            default:
+              MatrixRain.decelerateToSlow(
+                CONFIG.SLIDE_RAIN_DECEL_MS,
+                CONFIG.SLOW_FACTOR,
+                CONFIG.SLOW_JITTER,
+                CONFIG.SLOW_STAGGER_MS
+              );
+              break;
+          }
+        },
+        getCurrentMode(){ return CONFIG.SLIDE_RAIN_MODE; },
+        getAverageSpeed(){ return averageSpeed(); }
+      };
+    })();
+
+    // -------- Reveal init (slides switch fast) --------
+    Reveal.initialize({
+      hash: true,
+      controls: true,
+      progress: true,
+      transition: 'fade',
+      backgroundTransition: 'fade',
+      transitionSpeed: 'default',   // fast/snappy
+      keyboard: { 32: null },
+      plugins: [ RevealMarkdown ]
+    });
+
+    // Per-slide behavior
+    function handleSlide(e){
+      if (e.indexh === 0){
+        // First slide: always continuous unless the user manually paused
+        if (!MatrixRain.isUserPaused()) MatrixRain.playContinuous();
+        updateModeHUD();
+        return;
+      }
+      // Slides > 0: resume if user paused, then apply current mode
+      MatrixRain.resumeIfUserPaused();
+      MatrixRain.applyMode(CONFIG.SLIDE_RAIN_MODE);
+      updateModeHUD();
+    }
+    Reveal.on('ready', handleSlide);
+    Reveal.on('slidechanged', handleSlide);
+
+    // Click-to-navigate (don’t steal clicks from UI) — ignore while lightbox open
+    document.addEventListener('click', (e)=>{
+      const lbOpen = document.getElementById('lb').classList.contains('show');
+      if (lbOpen) return; // don't navigate slides when lightbox is open
+      const blocked = e.target.closest('.reveal .controls, .reveal .progress, a, button, input, select, textarea, label, .navigate-left, .navigate-right');
+      if (blocked) return;
+      const mid = innerWidth/2;
+      if (e.clientX < mid) Reveal.prev(); else Reveal.next();
+    });
+
+    // -------- Keyboard controls --------
+    // Space: pause/resume rain; 1/2/3 switch modes live
+    document.addEventListener('keydown', (e)=>{
+      if (e.code === 'Space'){ e.preventDefault(); MatrixRain.togglePause(); return; }
+
+      const toast = document.getElementById('mode-toast');
+      const showToast = (txt)=>{ toast.textContent=txt; toast.classList.add('show'); clearTimeout(showToast._t); showToast._t=setTimeout(()=>toast.classList.remove('show'), 1200); };
+
+      if (e.key === '1'){ MatrixRain.applyMode('decelerate');    showToast('Mode: decelerate'); }
+      if (e.key === '2'){ MatrixRain.applyMode('brief-freeze');  showToast('Mode: brief-freeze'); }
+      if (e.key === '3'){ MatrixRain.applyMode('slow-continue'); showToast('Mode: slow-continue'); }
+      if (e.key === '4'){ MatrixRain.applyMode('continuous');  showToast('Mode: continuous'); }
+
+      // Apply immediately if not on slide 0
+      if ((e.key==='1'||e.key==='2'||e.key==='3') && Reveal.getIndices().h > 0) updateModeHUD();
+    });
+
+    // ---------- {matrix} marker helper ----------
+    function applyMatrixMarkers() {
+      const sec = document.querySelector('.reveal section.present');
+      if (!sec) return;
+      sec.querySelectorAll('h1,h2,h3,h4,p,li').forEach(el => {
+        const txt = el.textContent; if (!txt) return;
+        const m = txt.match(/^\s*\{matrix\}\s*/);
+        if (m) {
+          el.classList.add('matrix-text');
+          el.textContent = txt.replace(m[0], '');
+          // Promote non-headings to H2 so it’s clearly the slide title
+          if (!/^H[1-4]$/i.test(el.tagName)) {
+            const h = document.createElement('h2');
+            h.className = el.className;
+            h.textContent = el.textContent;
+            el.replaceWith(h);
+          }
+        }
+      });
+    }
+
+    Reveal.on('ready', applyMatrixMarkers);
+    Reveal.on('slidechanged', applyMatrixMarkers);
+
+    // ---------- Gallery lightbox (stop slide nav on overlay click) ----------
+    (function(){
+      const lb = document.getElementById('lb');
+      const img = lb.querySelector('img');
+      const cap = lb.querySelector('.caption');
+      const btnPrev = lb.querySelector('.prev');
+      const btnNext = lb.querySelector('.next');
+      const btnClose= lb.querySelector('.close');
+
+      let items = []; let idx = 0;
+
+      function open(itemsList, startIndex){
+        items = itemsList; idx = startIndex||0;
+        render(); lb.classList.add('show'); lb.setAttribute('aria-hidden','false');
+      }
+      function close(){ lb.classList.remove('show'); lb.setAttribute('aria-hidden','true'); }
+      function render(){
+        if (!items.length) return;
+        const it = items[idx];
+        img.src = it.src; img.alt = it.alt||'';
+        cap.textContent = it.alt||'';
+      }
+      function prev(){ idx = (idx + items.length - 1) % items.length; render(); }
+      function next(){ idx = (idx + 1) % items.length; render(); }
+
+      // Open from any gallery image
+      document.addEventListener('click', (e)=>{
+        const tile = e.target.closest('.gallery img, .gallery a');
+        if (tile){
+          e.preventDefault();
+          const gal = tile.closest('.gallery');
+          const nodes = Array.from(gal.querySelectorAll('img'));
+          const list = nodes.map(n => ({ src: n.currentSrc || n.src, alt: n.alt || '' }));
+          const start = Math.max(0, nodes.indexOf(tile.tagName === 'IMG' ? tile : tile.querySelector('img')));
+          open(list, start);
+          e.stopPropagation(); // prevent slide nav
+        }
+      });
+
+      // Stop clicks inside lightbox from bubbling to document (so slides don't change)
+      lb.addEventListener('click', (e)=>{
+        if (e.target === lb) { close(); } // click on overlay closes only
+        e.stopPropagation();
+      });
+      btnClose.addEventListener('click', (e)=>{ e.stopPropagation(); close(); });
+      btnPrev .addEventListener('click', (e)=>{ e.stopPropagation(); prev(); });
+      btnNext .addEventListener('click', (e)=>{ e.stopPropagation(); next(); });
+
+      // ESC/←/→ inside lightbox
+      document.addEventListener('keydown', (e)=>{
+        if (!lb.classList.contains('show')) return;
+        if (e.key === 'Escape') close();
+        if (e.key === 'ArrowLeft') prev();
+        if (e.key === 'ArrowRight') next();
+      });
+    })();
+
+    // ---------- Mode HUD ----------
+    function updateModeHUD(){
+      const hud = document.getElementById('mode-hud');
+      if (!CONFIG.MODE_HUD_ENABLED){ hud.classList.remove('show'); return; }
+      const mode = MatrixRain.getCurrentMode();
+      const spd  = MatrixRain.getAverageSpeed();
+      hud.textContent = `Mode: ${mode}  •  avg speed ≈ ${spd.toFixed(2)}`;
+      hud.classList.add('show');
+    }
+  </script>
+</body>
+</html>
