@@ -33,32 +33,38 @@ Note: There is currently a bug with this presentation that the HUD for the mode 
 
 ## FAQs (Click to expand)
 <details>
-<summary><strong><h3>How do I run this?</h3></strong></summary>
+<summary>
+
+### How do I run this?
+
+</summary>
 Simply open the presentation.html file and start presenting!
 </details>
 
 <details>
-<summary><strong><h3>How do I modify the content of the slides?</h3></strong></summary>
+<summary><strong><h3 style="display:inline-block">How do I modify the content of the slides?</h3></strong></summary>
 You will have to modify the contents of the presentation.html file. Scroll to the section that says "EDIT HERE" and you can edit up to where it says "END EDIT HERE". Note the format for the slides. Every slide needs to begin with {matrix} and in between the content of each slide, there is a divider, ---
 </details>
 
 <details>
-<summary><strong><h3>How do I change the presentation options?</h3></strong></summary>
+<summary><strong><h3 style="display:inline-block">How do I change the presentation options?</h3></strong></summary>
 There is a section of the presentation.html file that begins with "CONFIG" that allows you to customize options for the slides. It currently is focused primarily on the timings of the rain, which should allow you to slightly tweak it. If I get interest, I might add different color presets.
 </details>
 
 <details>
-<summary><strong><h3>What can I put in the slides?</h3></strong></summary>
+<summary><strong><h3 style="display:inline-block">What can I put in the slides?</h3></strong></summary>
+
 Good question. It accepts Markdown [here](https://www.markdownguide.org/cheat-sheet/) is a handy guide, HTML, and several embedded media types (eg. images, videos, links, etc.). The [reveal.js site](https://revealjs.com) has documention on other functionality, such as vertical slides, transitions, notes, and more. 
+
 </details>
 
 <details>
-<summary><strong><h3>Do you have a demo site?</h3></strong></summary>
+<summary><strong><h3 style="display:inline-block">Do you have a demo site?</h3></strong></summary>
 I do not. Luckily, this repository is small and should be quick to download. If you have any issues, please feel free to contact me via [my website](https://hhoover.net)
 </details>
 
 <details>
-<summary><strong><h3>Can I modify this and make it my own?</h3></strong></summary>
+<summary><strong><h3 style="display:inline-block">Can I modify this and make it my own?</h3></strong></summary>
 Yes! In fact, I encourage it. This repository is licensed under the INSERT LICENSE HERE. This code is not mine, and if modifying it makes you a better code/ have more fun with your presentations, please do.
 </details>
 
