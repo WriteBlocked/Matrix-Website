@@ -25,6 +25,41 @@ If I was going to use this personally, I would go through the effort of the "ful
     • First slide stays continuous unless you manually pause with Space.
     • Digits twinkle randomly while raining; they freeze exactly on pause.
 
+</details>
+
+## Demo GIF
+
+## FAQs (Click to expand)
+<details>
+<summary><strong><h3 style="display:inline-block">How do I run this?</h3></strong></summary>
+Simply open the presentation.html file and start presenting!
+</details>
+
+<details>
+<summary><strong><h3 style="display:inline-block">How do I modify the content of the slides?</h3></strong></summary>
+You will have to modify the contents of the presentation.html file. Scroll to the section that says "EDIT HERE" and you can edit up to where it says "END EDIT HERE". Note the format for the slides. Every slide needs to begin with {matrix} and in between the content of each slide, there is a divider, ---
+</details>
+
+<details>
+<summary><strong><h3 style="display:inline-block">How do I change the presentation options?</h3></strong></summary>
+There is a section of the presentation.html file that begins with "CONFIG" that allows you to customize options for the slides. It currently is focused primarily on the timings of the rain, which should allow you to slightly tweak it. If I get interest, I might add different color presets.
+</details>
+
+<details>
+<summary><strong><h3 style="display:inline-block">What can I put in the slides?</h3></strong></summary>
+Good question. It accepts Markdown [here](https://www.markdownguide.org/cheat-sheet/) is a handy guide, HTML, and several embedded media types (eg. images, videos, links, etc.). The [reveal.js site](https://revealjs.com) has documention on other functionality, such as vertical slides, transitions, notes, and more. 
+</details>
+
+<details>
+<summary><strong><h3 style="display:inline-block">Do you have a demo site?</h3></strong></summary>
+I do not. Luckily, this repository is small and should be quick to download. If you have any issues, please feel free to contact me via [my website](https://hhoover.net)
+</details>
+
+<details>
+<summary><strong><h3 style="display:inline-block">Can I modify this and make it my own?</h3></strong></summary>
+Yes! In fact, I encourage it. This repository is licensed under the INSERT LICENSE HERE. This code is not mine, and if modifying it makes you a better code/ have more fun with your presentations, please do.
+</details>
+
 <details><summary><h2 style="display:inline-block">Image Galleries</h2></strong></summary>
 Image galleries have a special format in this presentation. The following is a brief overview.
 
@@ -38,36 +73,3 @@ Image galleries have a special format in this presentation. The following is a b
         • Up to 6 images. Use .gallery-2/.gallery-3/.gallery-4 for columns.
         • Add class="contain" on an <img> to avoid tile cropping.
         • Click any image to open the built-in lightbox; use ←/→ or on-screen arrows. 
-
-</details>
-
-## FAQs (Click to expand)
-<details>
-<summary><strong><h3 style="display:inline">How do I run this?</h3></strong></summary>
-Simply open the presentation.html file and start presenting!
-</details>
-
-<details>
-<summary><strong><h3 style="display:inline">How do I modify the content of the slides?</h3></strong></summary>
-You will have to modify the contents of the presentation.html file. Scroll to the section that says "EDIT HERE" and you can edit up to where it says "END EDIT HERE". Note the format for the slides. Every slide needs to begin with {matrix} and in between the content of each slide, there is a divider, ---
-</details>
-
-<details>
-<summary><strong><h3 style="display:inline">How do I change the presentation options?</h3></strong></summary>
-There is a section of the presentation.html file that begins with "CONFIG" that allows you to customize options for the slides. It currently is focused primarily on the timings of the rain, which should allow you to slightly tweak it. If I get interest, I might add different color presets.
-</details>
-
-<details>
-<summary><strong><h3 style="display:inline">What can I put in the slides?</h3></strong></summary>
-Good question. It accepts Markdown [here](https://www.markdownguide.org/cheat-sheet/) is a handy guide, HTML, and several embedded media types (eg. images, videos, links, etc.). The [reveal.js site](https://revealjs.com) has documention on other functionality, such as vertical slides, transitions, notes, and more. 
-</details>
-
-<details>
-<summary><strong><h3 style="display:inline">Do you have a demo site?</h3></strong></summary>
-I do not. Luckily, this repository is small and should be quick to download. If you have any issues, please feel free to contact me via [my website](https://hhoover.net)
-</details>
-
-<details>
-<summary><strong><h3 style="display:inline">Can I modify this and make it my own?</h3></strong></summary>
-Yes! In fact, I encourage it. This repository is licensed under the INSERT LICENSE HERE. This code is not mine, and if modifying it makes you a better code/ have more fun with your presentations, please do.
-</details>
